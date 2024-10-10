@@ -2,12 +2,12 @@ package springcloud
 
 import (
 	"encoding/json"
+	"github.com/libgox/gocollections/syncx"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
-	"github.com/shoothzj/gox/syncx"
 	"time"
 )
 
-type Config struct {
+type ZooKeeperDiscoveryConfig struct {
 	ZkConfig *zk.Config
 }
 
@@ -20,7 +20,7 @@ type ZookeeperDiscovery struct {
 	endpoints syncx.Map[string, []*Endpoint]
 }
 
-func NewZookeeperDiscovery(config *Config) (*ZookeeperDiscovery, error) {
+func NewZookeeperDiscovery(config *ZooKeeperDiscoveryConfig) (*ZookeeperDiscovery, error) {
 	z := &ZookeeperDiscovery{
 		config: config.ZkConfig,
 	}
