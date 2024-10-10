@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewZookeeperDiscovery(t *testing.T) {
-	zd, err := NewZookeeperDiscovery(&Config{
+	zd, err := NewZookeeperDiscovery(&ZooKeeperDiscoveryConfig{
 		ZkConfig: &zk.Config{
 			Addresses: []netx.Address{
 				{
