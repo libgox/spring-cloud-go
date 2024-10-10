@@ -65,7 +65,13 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 		return nil, ErrorNoAvailableEndpoint
 	}
 
-	url := fmt.Sprintf("http://%s:%d%s", endpoint.Address, endpoint.Port, path)
+	var prefix string
+	if c.tlsEnabled {
+		prefix = "https://"
+	} else {
+		prefix = "http://"
+	}
+	url := fmt.Sprintf("%s%s:%d%s", prefix, endpoint.Address, endpoint.Port, path)
 
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(body))
 	if err != nil {
