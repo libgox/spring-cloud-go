@@ -5,9 +5,10 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/libgox/gocollections/syncx"
 	"net/http"
 	"sync/atomic"
+
+	"github.com/libgox/gocollections/syncx"
 )
 
 type ClientConfig struct {
@@ -85,10 +86,16 @@ func (c *Client) getNextEndpoint(serviceName string, endpoints []*Endpoint) (*En
 		return nil, false
 	}
 
-	rrIndex, ok := c.rrIndices.Load(serviceName)
+	_, ok := c.rrIndices.Load(serviceName)
 	if !ok {
 		var newRRIndex atomic.Uint32
 		c.rrIndices.Store(serviceName, &newRRIndex)
+	}
+
+	// load rrIndex again
+	rrIndex, ok := c.rrIndices.Load(serviceName)
+	if !ok {
+		return nil, false
 	}
 
 	index := rrIndex.Load()
