@@ -30,7 +30,7 @@ import (
 func main() {
 	config := &springcloud.Config{
 		ZkConfig: &zk.Config{
-			Addresses: []netx.Address{
+			Addresses: []zk.Address{
 				{
 					Host: "localhost",
 					Port: 2181,
