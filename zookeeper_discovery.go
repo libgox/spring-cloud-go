@@ -2,9 +2,10 @@ package springcloud
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/libgox/gocollections/syncx"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
-	"time"
 )
 
 type ZooKeeperDiscoveryConfig struct {
@@ -82,12 +83,12 @@ func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint
 		if err != nil {
 			return nil, err
 		}
-		var endpoint *Endpoint
-		err = json.Unmarshal(data.Data, endpoint)
+		var endpoint Endpoint
+		err = json.Unmarshal(data.Data, &endpoint)
 		if err != nil {
 			return nil, err
 		}
-		endpointList = append(endpointList, endpoint)
+		endpointList = append(endpointList, &endpoint)
 	}
 	return endpointList, nil
 }
