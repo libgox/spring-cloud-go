@@ -3,8 +3,9 @@ module github.com/libgox/spring-cloud-go
 go 1.20
 
 require (
-	github.com/libgox/gocollections v0.0.0-20241010224724-67f1f27fb80d
-	github.com/protocol-laboratory/zookeeper-client-go v0.0.4-0.20241014095835-d6f98cafc674
+	github.com/libgox/addr v0.1.0
+	github.com/libgox/gocollections v0.0.0-20241015042445-f5331b9e5556
+	github.com/protocol-laboratory/zookeeper-client-go v0.0.4-0.20241015043707-2665cedd190d
 	github.com/stretchr/testify v1.9.0
 )
 
