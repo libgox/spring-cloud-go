@@ -3,6 +3,8 @@ package springcloud
 import (
 	"testing"
 
+	"github.com/libgox/addr"
+
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +13,7 @@ import (
 func TestNewZookeeperDiscovery(t *testing.T) {
 	zd, err := NewZookeeperDiscovery(&ZooKeeperDiscoveryConfig{
 		ZkConfig: &zk.Config{
-			Addresses: []zk.Address{
+			Addresses: []addr.Address{
 				{
 					Host: "localhost",
 					Port: 2181,
@@ -28,7 +30,7 @@ func TestNewZookeeperDiscovery(t *testing.T) {
 
 func TestGetEndpointZooKeeperData(t *testing.T) {
 	config := &zk.Config{
-		Addresses: []zk.Address{
+		Addresses: []addr.Address{
 			{
 				Host: "localhost",
 				Port: 2181,
@@ -62,7 +64,7 @@ func TestGetEndpointZooKeeperData(t *testing.T) {
 	defer client.Delete("/services/test/id1", -1)
 	zd, err := NewZookeeperDiscovery(&ZooKeeperDiscoveryConfig{
 		ZkConfig: &zk.Config{
-			Addresses: []zk.Address{
+			Addresses: []addr.Address{
 				{
 					Host: "localhost",
 					Port: 2181,
