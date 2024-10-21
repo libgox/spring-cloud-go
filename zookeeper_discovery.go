@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"time"
 
+	"golang.org/x/exp/slog"
+
 	"github.com/libgox/gocollections/syncx"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
 )
 
 type ZooKeeperDiscoveryConfig struct {
 	ZkConfig *zk.Config
+
+	// Logger structured logger for logging operations
+	Logger *slog.Logger
 }
 
 type ZookeeperDiscovery struct {
@@ -19,11 +24,18 @@ type ZookeeperDiscovery struct {
 	ticker *time.Ticker
 
 	endpoints syncx.Map[string, []*Endpoint]
+
+	logger *slog.Logger
 }
 
 func NewZookeeperDiscovery(config *ZooKeeperDiscoveryConfig) (*ZookeeperDiscovery, error) {
 	z := &ZookeeperDiscovery{
 		config: config.ZkConfig,
+	}
+	if config.Logger != nil {
+		z.logger = config.Logger
+	} else {
+		z.logger = slog.Default()
 	}
 	var err error
 	z.client, err = zk.NewClient(z.config)
