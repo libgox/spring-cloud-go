@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/textproto"
 	"sync/atomic"
 
 	"github.com/libgox/gocollections/syncx"
@@ -39,23 +40,23 @@ func NewClient(config ClientConfig) *Client {
 	}
 }
 
-func (c *Client) Get(ctx context.Context, serviceName string, path string) (*http.Response, error) {
-	return c.Request(ctx, serviceName, http.MethodGet, path, nil)
+func (c *Client) Get(ctx context.Context, serviceName string, path string, headers textproto.MIMEHeader) (*http.Response, error) {
+	return c.Request(ctx, serviceName, http.MethodGet, path, nil, headers)
 }
 
-func (c *Client) Post(ctx context.Context, serviceName string, path string, body []byte) (*http.Response, error) {
-	return c.Request(ctx, serviceName, http.MethodPost, path, body)
+func (c *Client) Post(ctx context.Context, serviceName string, path string, body []byte, headers textproto.MIMEHeader) (*http.Response, error) {
+	return c.Request(ctx, serviceName, http.MethodPost, path, body, headers)
 }
 
-func (c *Client) Put(ctx context.Context, serviceName string, path string, body []byte) (*http.Response, error) {
-	return c.Request(ctx, serviceName, http.MethodPut, path, body)
+func (c *Client) Put(ctx context.Context, serviceName string, path string, body []byte, headers textproto.MIMEHeader) (*http.Response, error) {
+	return c.Request(ctx, serviceName, http.MethodPut, path, body, headers)
 }
 
-func (c *Client) Delete(ctx context.Context, serviceName string, path string) (*http.Response, error) {
-	return c.Request(ctx, serviceName, http.MethodDelete, path, nil)
+func (c *Client) Delete(ctx context.Context, serviceName string, path string, headers textproto.MIMEHeader) (*http.Response, error) {
+	return c.Request(ctx, serviceName, http.MethodDelete, path, nil, headers)
 }
 
-func (c *Client) Request(ctx context.Context, serviceName string, method string, path string, body []byte) (*http.Response, error) {
+func (c *Client) Request(ctx context.Context, serviceName string, method string, path string, body []byte, headers textproto.MIMEHeader) (*http.Response, error) {
 	endpoints, err := c.discovery.GetEndpoints(serviceName)
 	if err != nil {
 		return nil, err
@@ -77,6 +78,12 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
+	}
+
+	for key, values := range headers {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
 	}
 
 	resp, err := c.httpClient.Do(req)

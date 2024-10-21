@@ -109,7 +109,7 @@ func main() {
 	client := springcloud.NewClient(clientConfig)
 
 	// Make a GET request to a discovered service
-	resp, err := client.Get(context.Background(), "springcloud-service", "/path/to/resource")
+	resp, err := client.Get(context.Background(), "springcloud-service", "/path/to/resource", nil)
 	if err != nil {
 		log.Fatalf("Failed to perform GET request: %v", err)
 	}
