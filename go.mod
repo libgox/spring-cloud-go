@@ -7,6 +7,7 @@ require (
 	github.com/libgox/gocollections v0.0.0-20241015042445-f5331b9e5556
 	github.com/protocol-laboratory/zookeeper-client-go v0.0.4-0.20241015090230-f17fb4d951c2
 	github.com/stretchr/testify v1.9.0
+	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948
 )
 
 require (
