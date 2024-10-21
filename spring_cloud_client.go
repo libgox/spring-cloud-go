@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/textproto"
@@ -38,6 +39,53 @@ func NewClient(config ClientConfig) *Client {
 		httpClient: httpClient,
 		tlsEnabled: config.TlsConfig != nil,
 	}
+}
+
+// JsonGet sends a GET request and automatically handles JSON response unmarshalling
+func (c *Client) JsonGet(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
+	return c.JsonRequest(ctx, serviceName, http.MethodGet, path, nil, headers, respObj)
+}
+
+// JsonPost sends a POST request with JSON marshalling of the request body and JSON unmarshalling of the response
+func (c *Client) JsonPost(ctx context.Context, serviceName, path string, reqObj any, headers textproto.MIMEHeader, respObj any) error {
+	body, err := json.Marshal(reqObj)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request object: %v", err)
+	}
+	return c.JsonRequest(ctx, serviceName, http.MethodPost, path, body, headers, respObj)
+}
+
+// JsonPut sends a PUT request with JSON marshalling of the request body and JSON unmarshalling of the response
+func (c *Client) JsonPut(ctx context.Context, serviceName, path string, reqObj any, headers textproto.MIMEHeader, respObj any) error {
+	body, err := json.Marshal(reqObj)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request object: %v", err)
+	}
+	return c.JsonRequest(ctx, serviceName, http.MethodPut, path, body, headers, respObj)
+}
+
+// JsonDelete sends a DELETE request and automatically handles JSON response unmarshalling
+func (c *Client) JsonDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
+	return c.JsonRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, respObj)
+}
+
+// JsonRequest handles making a request, sending JSON data, and automatically unmarshalling the JSON response
+func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path string, body []byte, headers textproto.MIMEHeader, respObj any) error {
+	resp, err := c.Request(ctx, serviceName, method, path, body, headers)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		if err := json.NewDecoder(resp.Body).Decode(respObj); err != nil {
+			return fmt.Errorf("failed to decode JSON response: %v", err)
+		}
+	} else {
+		return fmt.Errorf("received non-success status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }
 
 func (c *Client) Get(ctx context.Context, serviceName string, path string, headers textproto.MIMEHeader) (*http.Response, error) {
