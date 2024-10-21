@@ -2,6 +2,7 @@ package springcloud
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slog"
@@ -70,13 +71,28 @@ func (z *ZookeeperDiscovery) updateEndpoints() {
 			return true
 		})
 		for _, service := range services {
+			z.logger.Info("fetching new endpoints from zookeeper", slog.String("service", service))
 			endpointsFromZk, err := z.getEndpointsFromZk(service)
 			if err != nil {
+				z.logger.Error("failed to fetch endpoints from zookeeper", slog.String("service", service), slog.Any("error", err))
 				continue
 			}
+			z.logger.Info("successfully fetched endpoints", slog.String("service", service), slog.String("ips", formatIPs(extractEndpointIPs(endpointsFromZk))))
 			z.endpoints.Store(service, endpointsFromZk)
 		}
 	}
+}
+
+func extractEndpointIPs(endpoints []*Endpoint) []string {
+	var ips []string
+	for _, endpoint := range endpoints {
+		ips = append(ips, endpoint.Address)
+	}
+	return ips
+}
+
+func formatIPs(ips []string) string {
+	return strings.Join(ips, ", ")
 }
 
 func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint, error) {
