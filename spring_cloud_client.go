@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 	"net/textproto"
@@ -20,6 +21,7 @@ const (
 
 const (
 	MediaJson = "application/json"
+	MediaXml  = "application/xml"
 )
 
 type ClientConfig struct {
@@ -97,6 +99,61 @@ func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path stri
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		if err := json.NewDecoder(resp.Body).Decode(respObj); err != nil {
 			return fmt.Errorf("failed to decode JSON response: %v", err)
+		}
+	} else {
+		return fmt.Errorf("received non-success status code: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// XmlGet sends a GET request and automatically handles XML response unmarshalling
+func (c *Client) XmlGet(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
+	return c.XmlRequest(ctx, serviceName, http.MethodGet, path, nil, headers, respObj)
+}
+
+// XmlPost sends a POST request with XML marshalling of the request body and XML unmarshalling of the response
+func (c *Client) XmlPost(ctx context.Context, serviceName, path string, reqObj any, headers textproto.MIMEHeader, respObj any) error {
+	body, err := xml.Marshal(reqObj)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request object: %v", err)
+	}
+	return c.XmlRequest(ctx, serviceName, http.MethodPost, path, body, headers, respObj)
+}
+
+// XmlPut sends a PUT request with XML marshalling of the request body and XML unmarshalling of the response
+func (c *Client) XmlPut(ctx context.Context, serviceName, path string, reqObj any, headers textproto.MIMEHeader, respObj any) error {
+	body, err := xml.Marshal(reqObj)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request object: %v", err)
+	}
+	return c.XmlRequest(ctx, serviceName, http.MethodPut, path, body, headers, respObj)
+}
+
+// XmlDelete sends a DELETE request and automatically handles XML response unmarshalling
+func (c *Client) XmlDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
+	return c.XmlRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, respObj)
+}
+
+// XmlRequest handles making a request, sending XML data, and automatically unmarshalling the XML response
+func (c *Client) XmlRequest(ctx context.Context, serviceName, method, path string, body []byte, headers textproto.MIMEHeader, respObj any) error {
+	if headers.Get(HeaderAccept) == "" {
+		headers.Set(HeaderAccept, MediaXml)
+	}
+
+	if headers.Get(HeaderContentType) == "" {
+		headers.Set(HeaderContentType, MediaXml)
+	}
+
+	resp, err := c.Request(ctx, serviceName, method, path, body, headers)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		if err := xml.NewDecoder(resp.Body).Decode(respObj); err != nil {
+			return fmt.Errorf("failed to decode XML response: %v", err)
 		}
 	} else {
 		return fmt.Errorf("received non-success status code: %d", resp.StatusCode)
