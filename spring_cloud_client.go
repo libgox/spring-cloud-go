@@ -13,6 +13,15 @@ import (
 	"github.com/libgox/gocollections/syncx"
 )
 
+const (
+	HeaderAccept      = "Accept"
+	HeaderContentType = "Content-Type"
+)
+
+const (
+	MediaJson = "application/json"
+)
+
 type ClientConfig struct {
 	Discovery Discovery
 	TlsConfig *tls.Config
@@ -71,6 +80,14 @@ func (c *Client) JsonDelete(ctx context.Context, serviceName, path string, heade
 
 // JsonRequest handles making a request, sending JSON data, and automatically unmarshalling the JSON response
 func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path string, body []byte, headers textproto.MIMEHeader, respObj any) error {
+	if headers.Get(HeaderAccept) == "" {
+		headers.Set(HeaderAccept, MediaJson)
+	}
+
+	if headers.Get(HeaderContentType) == "" {
+		headers.Set(HeaderContentType, MediaJson)
+	}
+
 	resp, err := c.Request(ctx, serviceName, method, path, body, headers)
 	if err != nil {
 		return err
