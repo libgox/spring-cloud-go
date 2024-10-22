@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"net/http"
 	"net/textproto"
 	"sync/atomic"
@@ -101,7 +102,12 @@ func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path stri
 			return fmt.Errorf("failed to decode JSON response: %v", err)
 		}
 	} else {
-		return fmt.Errorf("received non-success status code: %d", resp.StatusCode)
+		responseBody, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return NewHttpStatusError(resp.StatusCode, fmt.Sprintf("failed to read response body: %v", readErr))
+		}
+
+		return NewHttpStatusError(resp.StatusCode, string(responseBody))
 	}
 
 	return nil
@@ -156,7 +162,12 @@ func (c *Client) XmlRequest(ctx context.Context, serviceName, method, path strin
 			return fmt.Errorf("failed to decode XML response: %v", err)
 		}
 	} else {
-		return fmt.Errorf("received non-success status code: %d", resp.StatusCode)
+		responseBody, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return NewHttpStatusError(resp.StatusCode, fmt.Sprintf("failed to read response body: %v", readErr))
+		}
+
+		return NewHttpStatusError(resp.StatusCode, string(responseBody))
 	}
 
 	return nil
