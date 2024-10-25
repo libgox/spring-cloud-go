@@ -240,21 +240,13 @@ func (c *Client) getNextEndpoint(serviceName string, endpoints []*Endpoint) (*En
 		return nil, false
 	}
 
-	_, ok := c.rrIndices.Load(serviceName)
-	if !ok {
-		var newRRIndex atomic.Uint32
-		c.rrIndices.Store(serviceName, &newRRIndex)
-	}
+	var newRRIndex atomic.Uint32
+	rrIndex, _ := c.rrIndices.LoadOrStore(serviceName, &newRRIndex)
 
-	// load rrIndex again
-	rrIndex, ok := c.rrIndices.Load(serviceName)
-	if !ok {
-		return nil, false
-	}
+	index := rrIndex.Add(1)
 
-	index := rrIndex.Load()
-	nextIndex := (index + 1) % uint32(len(endpoints))
-	rrIndex.Store(nextIndex)
+	// index start with 0
+	idx := (index - 1) % uint32(len(endpoints))
 
-	return endpoints[index], true
+	return endpoints[int(idx)], true
 }
