@@ -97,20 +97,24 @@ func formatIPs(ips []string) string {
 
 func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint, error) {
 	path := "/services/" + serviceName
+	z.logger.Debug("fetching endpoints from zookeeper", slog.String("path", path))
 	resp, err := z.client.GetChildren(path)
 	if err != nil {
 		return nil, err
 	}
+	z.logger.Debug("fetched endpoints from zookeeper", slog.String("path", path), slog.Any("endpoints", resp.Children))
 	var endpointList []*Endpoint
 	if len(resp.Children) == 0 {
 		return endpointList, nil
 	}
 	for _, child := range resp.Children {
+		z.logger.Debug("fetching endpoint from zookeeper", slog.String("path", path+"/"+child))
 		var data *zk.GetDataResp
 		data, err = z.client.GetData(path + "/" + child)
 		if err != nil {
 			return nil, err
 		}
+		z.logger.Debug("fetched endpoint from zookeeper", slog.String("path", path+"/"+child), slog.Any("data", data))
 		var endpoint Endpoint
 		err = json.Unmarshal(data.Data, &endpoint)
 		if err != nil {
