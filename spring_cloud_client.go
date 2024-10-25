@@ -83,6 +83,10 @@ func (c *Client) JsonDelete(ctx context.Context, serviceName, path string, heade
 
 // JsonRequest handles making a request, sending JSON data, and automatically unmarshalling the JSON response
 func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path string, body []byte, headers textproto.MIMEHeader, respObj any) error {
+	if headers == nil {
+		headers = make(textproto.MIMEHeader)
+	}
+
 	if headers.Get(HeaderAccept) == "" {
 		headers.Set(HeaderAccept, MediaJson)
 	}
@@ -143,6 +147,10 @@ func (c *Client) XmlDelete(ctx context.Context, serviceName, path string, header
 
 // XmlRequest handles making a request, sending XML data, and automatically unmarshalling the XML response
 func (c *Client) XmlRequest(ctx context.Context, serviceName, method, path string, body []byte, headers textproto.MIMEHeader, respObj any) error {
+	if headers == nil {
+		headers = make(textproto.MIMEHeader)
+	}
+
 	if headers.Get(HeaderAccept) == "" {
 		headers.Set(HeaderAccept, MediaXml)
 	}
