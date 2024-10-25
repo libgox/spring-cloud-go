@@ -197,7 +197,7 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 
 	endpoint, ok := c.getNextEndpoint(serviceName, endpoints)
 	if !ok {
-		return nil, ErrorNoAvailableEndpoint
+		return nil, ErrNoAvailableEndpoint
 	}
 
 	var prefix string

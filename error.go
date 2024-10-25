@@ -3,5 +3,5 @@ package springcloud
 import "errors"
 
 var (
-	ErrorNoAvailableEndpoint = errors.New("no available endpoint")
+	ErrNoAvailableEndpoint = errors.New("no available endpoint")
 )
