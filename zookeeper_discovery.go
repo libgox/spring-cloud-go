@@ -125,7 +125,8 @@ func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint
 	return endpointList, nil
 }
 
-func (z *ZookeeperDiscovery) Close() {
+func (z *ZookeeperDiscovery) Close() error {
 	z.ticker.Stop()
 	z.client.Close()
+	return nil
 }
