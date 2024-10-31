@@ -1,7 +1,6 @@
 package springcloud
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -10,15 +9,6 @@ type HttpStatusError struct {
 	StatusCode int
 	StatusText string
 	Body       string
-}
-
-func (e *HttpStatusError) Is(target error) bool {
-	var t *HttpStatusError
-	ok := errors.As(target, &t)
-	if !ok {
-		return false
-	}
-	return e.StatusCode == t.StatusCode && e.Body == t.Body
 }
 
 func (e *HttpStatusError) Error() string {
