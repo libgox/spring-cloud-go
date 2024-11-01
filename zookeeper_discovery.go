@@ -18,6 +18,8 @@ type ZooKeeperDiscoveryConfig struct {
 	Logger *slog.Logger
 }
 
+var _ Discovery = (*ZookeeperDiscovery)(nil)
+
 type ZookeeperDiscovery struct {
 	config *zk.Config
 
