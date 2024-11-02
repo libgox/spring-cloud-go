@@ -77,8 +77,8 @@ func (c *Client) JsonPut(ctx context.Context, serviceName, path string, reqObj a
 }
 
 // JsonDelete sends a DELETE request and automatically handles JSON response unmarshalling
-func (c *Client) JsonDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
-	return c.JsonRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, respObj)
+func (c *Client) JsonDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader) error {
+	return c.JsonRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, nil)
 }
 
 // JsonRequest handles making a request, sending JSON data, and automatically unmarshalling the JSON response
@@ -102,8 +102,10 @@ func (c *Client) JsonRequest(ctx context.Context, serviceName, method, path stri
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		if err := json.NewDecoder(resp.Body).Decode(respObj); err != nil {
-			return fmt.Errorf("failed to decode JSON response: %v", err)
+		if respObj != nil {
+			if err := json.NewDecoder(resp.Body).Decode(respObj); err != nil {
+				return fmt.Errorf("failed to decode JSON response: %v", err)
+			}
 		}
 	} else {
 		responseBody, readErr := io.ReadAll(resp.Body)
@@ -141,8 +143,8 @@ func (c *Client) XmlPut(ctx context.Context, serviceName, path string, reqObj an
 }
 
 // XmlDelete sends a DELETE request and automatically handles XML response unmarshalling
-func (c *Client) XmlDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader, respObj any) error {
-	return c.XmlRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, respObj)
+func (c *Client) XmlDelete(ctx context.Context, serviceName, path string, headers textproto.MIMEHeader) error {
+	return c.XmlRequest(ctx, serviceName, http.MethodDelete, path, nil, headers, nil)
 }
 
 // XmlRequest handles making a request, sending XML data, and automatically unmarshalling the XML response
@@ -166,8 +168,10 @@ func (c *Client) XmlRequest(ctx context.Context, serviceName, method, path strin
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		if err := xml.NewDecoder(resp.Body).Decode(respObj); err != nil {
-			return fmt.Errorf("failed to decode XML response: %v", err)
+		if respObj != nil {
+			if err := xml.NewDecoder(resp.Body).Decode(respObj); err != nil {
+				return fmt.Errorf("failed to decode XML response: %v", err)
+			}
 		}
 	} else {
 		responseBody, readErr := io.ReadAll(resp.Body)
