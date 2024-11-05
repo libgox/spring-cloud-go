@@ -2,6 +2,7 @@ package springcloud
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -110,13 +111,16 @@ func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint
 		return endpointList, nil
 	}
 	for _, child := range resp.Children {
-		z.logger.Debug("fetching endpoint from zookeeper", slog.String("path", path+"/"+child))
+		z.logger.Debug("fetching from zookeeper", slog.String("path", path+"/"+child))
 		var data *zk.GetDataResp
 		data, err = z.client.GetData(path + "/" + child)
 		if err != nil {
 			return nil, err
 		}
-		z.logger.Debug("fetched endpoint from zookeeper", slog.String("path", path+"/"+child), slog.Any("data", data))
+		z.logger.Debug("fetched data", slog.String("path", path+"/"+child), slog.Any("data", data))
+		if data.Error != zk.EC_OK {
+			return nil, fmt.Errorf("failed to get data from zookeeper: %v", data.Error)
+		}
 		var endpoint Endpoint
 		err = json.Unmarshal(data.Data, &endpoint)
 		if err != nil {
