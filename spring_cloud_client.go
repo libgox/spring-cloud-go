@@ -8,9 +8,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/textproto"
 	"sync/atomic"
+	"time"
 
 	"github.com/libgox/gocollections/syncx"
 )
@@ -27,7 +29,12 @@ const (
 
 type ClientConfig struct {
 	Discovery Discovery
+	// TlsConfig configuration information for tls.
 	TlsConfig *tls.Config
+	// Timeout default 30s
+	Timeout time.Duration
+	// ConnectTimeout default 10s
+	ConnectTimeout time.Duration
 }
 
 type Client struct {
@@ -38,12 +45,21 @@ type Client struct {
 }
 
 func NewClient(config ClientConfig) *Client {
-	transport := &http.Transport{
-		TLSClientConfig: config.TlsConfig,
+	if config.Timeout <= 0 {
+		config.Timeout = 30 * time.Second
+	}
+	if config.ConnectTimeout <= 0 {
+		config.ConnectTimeout = 10 * time.Second
 	}
 
 	httpClient := &http.Client{
-		Transport: transport,
+		Timeout: config.Timeout,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout: config.ConnectTimeout,
+			}).DialContext,
+			TLSClientConfig: config.TlsConfig,
+		},
 	}
 
 	return &Client{
