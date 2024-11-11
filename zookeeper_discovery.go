@@ -118,6 +118,10 @@ func (z *ZookeeperDiscovery) getEndpointsFromZk(serviceName string) ([]*Endpoint
 			return nil, err
 		}
 		z.logger.Debug("fetched data", slog.String("path", path+"/"+child), slog.Any("data", data))
+		if data.Error == zk.EC_NoNodeError {
+			z.logger.Info("node not found", slog.String("path", path+"/"+child))
+			continue
+		}
 		if data.Error != zk.EC_OK {
 			return nil, fmt.Errorf("failed to get data from zookeeper: %v", data.Error)
 		}
