@@ -13,5 +13,10 @@ type Endpoint struct {
 }
 
 type UriSpec struct {
-	Parts map[string]bool `json:"parts"`
+	Parts []Part `json:"parts"`
+}
+
+type Part struct {
+	Value    string `json:"value"`
+	Variable bool   `json:"variable"`
 }
