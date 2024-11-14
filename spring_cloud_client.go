@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/libgox/gocollections/syncx"
+	"golang.org/x/exp/slog"
 )
 
 const (
@@ -35,6 +36,8 @@ type ClientConfig struct {
 	Timeout time.Duration
 	// ConnectTimeout default 10s
 	ConnectTimeout time.Duration
+	// Logger structured logger for logging operations
+	Logger *slog.Logger
 }
 
 type Client struct {
@@ -42,6 +45,7 @@ type Client struct {
 	httpClient *http.Client
 	tlsEnabled bool
 	rrIndices  syncx.Map[string, *atomic.Uint32]
+	logger     *slog.Logger
 }
 
 func NewClient(config ClientConfig) *Client {
@@ -62,11 +66,19 @@ func NewClient(config ClientConfig) *Client {
 		},
 	}
 
-	return &Client{
+	c := &Client{
 		discovery:  config.Discovery,
 		httpClient: httpClient,
 		tlsEnabled: config.TlsConfig != nil,
 	}
+
+	if config.Logger != nil {
+		c.logger = config.Logger
+	} else {
+		c.logger = slog.Default()
+	}
+
+	return c
 }
 
 // JsonGet sends a GET request and automatically handles JSON response unmarshalling
@@ -223,10 +235,14 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 		return nil, err
 	}
 
+	c.logger.Debug("successfully get endpoints", slog.String("serviceName", serviceName), slog.String("ips", formatIPs(extractEndpointIPs(endpoints))))
+
 	endpoint, ok := c.getNextEndpoint(serviceName, endpoints)
 	if !ok {
 		return nil, ErrNoAvailableEndpoint
 	}
+
+	c.logger.Debug("choose endpoint", slog.String("serviceName", serviceName), slog.String("ip", endpoint.Address))
 
 	var prefix string
 	if c.tlsEnabled {
