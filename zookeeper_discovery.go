@@ -6,10 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/exp/slog"
-
 	"github.com/libgox/gocollections/syncx"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
+	"golang.org/x/exp/slog"
 )
 
 type ZooKeeperDiscoveryConfig struct {
