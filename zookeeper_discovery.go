@@ -3,6 +3,7 @@ package springcloud
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 
@@ -67,21 +68,33 @@ func (z *ZookeeperDiscovery) GetEndpoints(serviceName string) ([]*Endpoint, erro
 
 func (z *ZookeeperDiscovery) updateEndpoints() {
 	for range z.ticker.C {
-		services := make([]string, 0)
-		z.endpoints.Range(func(key string, value []*Endpoint) bool {
-			services = append(services, key)
-			return true
-		})
-		for _, service := range services {
-			z.logger.Info("fetching new endpoints from zookeeper", slog.String("service", service))
-			endpointsFromZk, err := z.getEndpointsFromZk(service)
-			if err != nil {
-				z.logger.Error("failed to fetch endpoints from zookeeper", slog.String("service", service), slog.Any("error", err))
-				continue
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					var buf [4096]byte
+					n := runtime.Stack(buf[:], false)
+					stackInfo := string(buf[:n])
+					z.logger.Error(fmt.Sprintf("%v cause panic, stack: %s", r, stackInfo))
+				}
+			}()
+
+			services := make([]string, 0)
+			z.endpoints.Range(func(key string, value []*Endpoint) bool {
+				services = append(services, key)
+				return true
+			})
+
+			for _, service := range services {
+				z.logger.Info("fetching new endpoints from zookeeper", slog.String("service", service))
+				endpointsFromZk, err := z.getEndpointsFromZk(service)
+				if err != nil {
+					z.logger.Error("failed to fetch endpoints from zookeeper", slog.String("service", service), slog.Any("error", err))
+					continue
+				}
+				z.logger.Info("successfully fetched endpoints", slog.String("service", service), slog.String("ips", formatIPs(extractEndpointIPs(endpointsFromZk))))
+				z.endpoints.Store(service, endpointsFromZk)
 			}
-			z.logger.Info("successfully fetched endpoints", slog.String("service", service), slog.String("ips", formatIPs(extractEndpointIPs(endpointsFromZk))))
-			z.endpoints.Store(service, endpointsFromZk)
-		}
+		}()
 	}
 }
 
