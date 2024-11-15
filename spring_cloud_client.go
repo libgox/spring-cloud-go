@@ -43,7 +43,7 @@ type ClientConfig struct {
 type Client struct {
 	discovery  Discovery
 	httpClient *http.Client
-	tlsEnabled bool
+	tlsConfig  *tls.Config
 	rrIndices  syncx.Map[string, *atomic.Uint32]
 	logger     *slog.Logger
 }
@@ -69,7 +69,7 @@ func NewClient(config ClientConfig) *Client {
 	c := &Client{
 		discovery:  config.Discovery,
 		httpClient: httpClient,
-		tlsEnabled: config.TlsConfig != nil,
+		tlsConfig:  config.TlsConfig,
 	}
 
 	if config.Logger != nil {
@@ -245,7 +245,7 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 	c.logger.Debug("choose endpoint", slog.String("serviceName", serviceName), slog.String("ip", endpoint.Address))
 
 	var prefix string
-	if c.tlsEnabled {
+	if c.tlsConfig != nil {
 		prefix = "https://"
 	} else {
 		prefix = "http://"
