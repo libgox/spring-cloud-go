@@ -235,14 +235,14 @@ func (c *Client) Request(ctx context.Context, serviceName string, method string,
 		return nil, err
 	}
 
-	c.logger.Debug("successfully get endpoints", slog.String("serviceName", serviceName), slog.String("ips", formatIPs(extractEndpointIPs(endpoints))))
+	c.logger.Debug("successfully get endpoints", slog.String(LogKeyService, serviceName), slog.String(LogKeyIps, formatIPs(extractEndpointIPs(endpoints))))
 
 	endpoint, ok := c.getNextEndpoint(serviceName, endpoints)
 	if !ok {
 		return nil, ErrNoAvailableEndpoint
 	}
 
-	c.logger.Debug("choose endpoint", slog.String("serviceName", serviceName), slog.String("ip", endpoint.Address))
+	c.logger.Debug("choose endpoint", slog.String(LogKeyService, serviceName), slog.String(LogKeyIp, endpoint.Address))
 
 	var prefix string
 	if c.tlsConfig != nil {
