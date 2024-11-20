@@ -33,13 +33,12 @@ type ZookeeperDiscovery struct {
 }
 
 func NewZookeeperDiscovery(config *ZooKeeperDiscoveryConfig) (*ZookeeperDiscovery, error) {
+	if config.Logger == nil {
+		config.Logger = slog.Default()
+	}
 	z := &ZookeeperDiscovery{
 		config: config.ZkConfig,
-	}
-	if config.Logger != nil {
-		z.logger = config.Logger
-	} else {
-		z.logger = slog.Default()
+		logger: config.Logger,
 	}
 	var err error
 	z.client, err = zk.NewClient(z.config)
