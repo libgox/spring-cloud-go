@@ -7,7 +7,7 @@ on:
     branches:
       - main
 jobs:
-  golangci:
+  goimports:
     name: lint
     runs-on: ubuntu-latest
     steps:
