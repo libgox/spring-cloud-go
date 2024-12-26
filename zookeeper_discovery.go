@@ -3,13 +3,13 @@ package springcloud
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/libgox/gocollections/syncx"
 	"github.com/protocol-laboratory/zookeeper-client-go/zk"
-	"golang.org/x/exp/slog"
 )
 
 type ZooKeeperDiscoveryConfig struct {

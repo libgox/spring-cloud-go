@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/libgox/gocollections/syncx"
-	"golang.org/x/exp/slog"
 )
 
 const (
