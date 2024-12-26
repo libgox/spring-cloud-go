@@ -6,7 +6,7 @@ require (
 	github.com/libgox/addr v0.2.0
 	github.com/libgox/gocollections v0.1.1
 	github.com/protocol-laboratory/zookeeper-client-go v0.3.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
