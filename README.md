@@ -60,10 +60,6 @@ func main() {
 }
 ```
 
-To add the `spring_cloud_client` section to your README, you can introduce it as a feature of your `spring-cloud-go` library that allows for seamless HTTP client communication using service discovery. Here's a suggestion on how to structure this new section:
-
----
-
 ### Spring Cloud Client Setup
 
 The `spring_cloud_client` package in `spring-cloud-go` enables HTTP-based communication between services, leveraging Spring Cloud's service discovery mechanism.
